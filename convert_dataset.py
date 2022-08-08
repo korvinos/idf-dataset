@@ -4,24 +4,26 @@ from config.idf_conf import IDF_BANDS, IDF_TIME_UNITS
 from utils import gen_gcp_ids, generate_times
 from cftime import date2num, num2pydate
 from datetime import datetime, timedelta
+from calendar import monthrange
 import gc
+
+
 time_start = datetime.now()
 
-product_name = 'MYWAVE'
+PRODUCT = 'MEPS'
+START_DATE = datetime(2019, 7, 1, 0, 0, 0)
 
-if product_name == 'NORSHELF':
+if PRODUCT == 'NORSHELF':
     from config.norshelf.processor import *
-elif product_name == 'MEPS':
+elif PRODUCT == 'MEPS':
     from config.meps.processor import *
-elif product_name == 'MYWAVE':
+elif PRODUCT == 'MYWAVE':
     from config.mywave.processor import *
 
-
-
 DST.mkdir(exist_ok=True)
-start_date = datetime(2019, 7, 1, 0, 0, 0)
 # Generate a list of timestamps for input files
-src_times = generate_times(start_date, 725, TIME['output_step'])
+n_hours = monthrange(START_DATE.year, START_DATE.month)[-1] * 24 + 1
+src_times = generate_times(START_DATE, n_hours, TIME['output_step'])
 i = 1
 
 # Iterate through all files
@@ -105,12 +107,12 @@ for timestamp in src_times:
             band = data_idf.createVariable(
                 varname, IDF_BANDS[varname]['datatype'], IDF_BANDS[varname]['dimensions'])
             if varname == 'lat_gcp':
-                if product_name == 'MYWAVE':
+                if PRODUCT == 'MYWAVE':
                     data = ds[LAT_VAR_NAME][:].T[gcp_ids_row, :][:, gcp_ids_cell]
                 else:
                     data = ds[LAT_VAR_NAME][gcp_ids_row, :][:, gcp_ids_cell]
             elif varname == 'lon_gcp':
-                if product_name == 'MYWAVE':
+                if PRODUCT == 'MYWAVE':
                     data = ds[LON_VAR_NAME][:].T[gcp_ids_row, :][:, gcp_ids_cell]
                 else:
                     data = ds[LON_VAR_NAME][gcp_ids_row, :][:, gcp_ids_cell]
