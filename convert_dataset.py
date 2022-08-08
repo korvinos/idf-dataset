@@ -5,7 +5,6 @@ from utils import gen_gcp_ids, generate_times
 from cftime import date2num, num2pydate
 from datetime import datetime, timedelta
 from calendar import monthrange
-import gc
 
 
 time_start = datetime.now()
